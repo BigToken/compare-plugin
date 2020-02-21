@@ -472,6 +472,12 @@ inline void gotoClosestUnhiddenLine(int view)
 }
 
 
+inline void gotoClosestUnhiddenLine(int view, int line)
+{
+	CallScintilla(view, SCI_GOTOLINE, getUnhiddenLine(view, line), 0);
+}
+
+
 inline int getWrapCount(int view, int line)
 {
 	return CallScintilla(view, SCI_WRAPCOUNT, line, 0);

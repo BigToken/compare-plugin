@@ -152,9 +152,9 @@ void ViewLocation::save(int view, int centerLine)
 		_selStart	= CallScintilla(view, SCI_GETSELECTIONSTART, 0, 0);
 		_selEnd		= CallScintilla(view, SCI_GETSELECTIONEND, 0, 0);
 
-		const int line = CallScintilla(view, SCI_LINEFROMPOSITION, _pos, 0);
+		const int caretLine = CallScintilla(view, SCI_LINEFROMPOSITION, _pos, 0);
 
-		_visibleLineOffset = CallScintilla(view, SCI_VISIBLEFROMDOCLINE, line, 0) - getFirstVisibleLine(view);
+		_visibleLineOffset = CallScintilla(view, SCI_VISIBLEFROMDOCLINE, caretLine, 0) - getFirstVisibleLine(view);
 	}
 
 	LOGD("Store " + std::string(view == MAIN_VIEW ? "MAIN" : "SUB") + " view location\n");
@@ -171,7 +171,6 @@ bool ViewLocation::restore() const
 		const int caretLine = CallScintilla(_view, SCI_LINEFROMPOSITION, _pos, 0);
 		const int firstVisibleLine = CallScintilla(_view, SCI_VISIBLEFROMDOCLINE, caretLine, 0) - _visibleLineOffset;
 
-		CallScintilla(_view, SCI_ENSUREVISIBLEENFORCEPOLICY, caretLine, 0);
 		setSelection(_view, _selStart, _selEnd);
 		CallScintilla(_view, SCI_SETFIRSTVISIBLELINE, firstVisibleLine, 0);
 
@@ -364,8 +363,6 @@ void blinkRange(int view, int startPos, int endPos)
 
 void centerAt(int view, int line)
 {
-	CallScintilla(view, SCI_ENSUREVISIBLEENFORCEPOLICY, line, 0);
-
 	const int linesOnScreen = CallScintilla(view, SCI_LINESONSCREEN, 0, 0);
 	const int firstVisible = CallScintilla(view, SCI_VISIBLEFROMDOCLINE, line, 0) - linesOnScreen / 2;
 

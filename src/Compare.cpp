@@ -2786,12 +2786,7 @@ void Prev()
 	{
 		ScopedIncrementer incr(notificationsLock);
 
-		std::pair<int, int> viewLoc = jumpToChange(false, Settings.WrapAround);
-
-		if (viewLoc.first < 0)
-			storedLocation = nullptr;
-		else
-			storedLocation = std::make_unique<ViewLocation>(viewLoc.first, viewLoc.second);
+		jumpToChange(false, Settings.WrapAround);
 	}
 }
 
@@ -2802,12 +2797,7 @@ void Next()
 	{
 		ScopedIncrementer incr(notificationsLock);
 
-		std::pair<int, int> viewLoc = jumpToChange(true, Settings.WrapAround);
-
-		if (viewLoc.first < 0)
-			storedLocation = nullptr;
-		else
-			storedLocation = std::make_unique<ViewLocation>(viewLoc.first, viewLoc.second);
+		jumpToChange(true, Settings.WrapAround);
 	}
 }
 
@@ -2818,8 +2808,7 @@ void First()
 	{
 		ScopedIncrementer incr(notificationsLock);
 
-		std::pair<int, int> viewLoc = jumpToFirstChange(true);
-		storedLocation = std::make_unique<ViewLocation>(viewLoc.first, viewLoc.second);
+		jumpToFirstChange(true);
 	}
 }
 
@@ -2830,8 +2819,7 @@ void Last()
 	{
 		ScopedIncrementer incr(notificationsLock);
 
-		std::pair<int, int> viewLoc = jumpToLastChange(true);
-		storedLocation = std::make_unique<ViewLocation>(viewLoc.first, viewLoc.second);
+		jumpToLastChange(true);
 	}
 }
 
@@ -3391,6 +3379,8 @@ void onSciUpdateUI(HWND view)
 {
 	ScopedIncrementer incr(notificationsLock);
 
+	storedLocation = std::make_unique<ViewLocation>(getViewId(view));
+
 	syncViews(getViewId(view));
 }
 
@@ -3845,8 +3835,6 @@ void onSciModified(SCNotification* notifyCode)
 					}
 				}
 			}
-
-			SetLocation(view, startLine);
 		}
 	}
 
@@ -3983,8 +3971,6 @@ void onSciModified(SCNotification* notifyCode)
 
 			if (selectionsAdjusted)
 			{
-				SetLocation(view, startLine);
-
 				CallScintilla(view, SCI_ANNOTATIONCLEARALL, 0, 0);
 				CallScintilla(getOtherViewId(view), SCI_ANNOTATIONCLEARALL, 0, 0);
 
@@ -4027,7 +4013,7 @@ void DelayedActivate::operator()()
 
 	if (buffId != currentlyActiveBuffID)
 	{
-		storedLocation = std::make_unique<ViewLocation>(viewIdFromBuffId(buffId));
+		// storedLocation = std::make_unique<ViewLocation>(viewIdFromBuffId(buffId));
 
 		const ComparedFile& otherFile = cmpPair->getOtherFileByBuffId(buffId);
 
@@ -4279,12 +4265,6 @@ LRESULT statusProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 } // anonymous namespace
-
-
-void SetLocation(int view, int line)
-{
-	storedLocation = std::make_unique<ViewLocation>(view, line);
-}
 
 
 void ToggleNavigationBar()
